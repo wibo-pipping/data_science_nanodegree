@@ -1,17 +1,92 @@
-import pandas as pd
 import click
+import logging
+import pandas as pd
+from sqlalchemy import create_engine
+
+
+# Create logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Create streamhandler
+ch = logging.StreamHandler()
+# Set logging format and add to handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+# add handler to logger
+logger.addHandler(ch)
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    """Read in messages and categories from respective files. Merges the two datasets on the id column.
+
+    :param messages_filepath: filepath of messages dataset
+    :param categories_filepath:  filepath of categories dataset
+    :return: pandas DataFrame where messages and categories are merged.
+    """
+    logger.debug(f'Reading data from {messages_filepath}')
+    messages = pd.read_csv(messages_filepath)
+    logger.debug(f'Loaded {messages_filepath}, found {messages.shape[0]} lines with columns: '
+                 f'{", ".join(messages.columns)}')
+
+
+    logger.debug(f'Reading data from {categories_filepath}')
+    categories = pd.read_csv(categories_filepath)
+    logger.debug(f'Loaded {categories_filepath}, found {categories.shape[0]} lines with columns: '
+                 f'{", ".join(categories.columns)}')
+
+    logger.debug('Merging messages and categories using the "id" column...')
+    df = messages.merge(categories, on='id')
+    logger.debug('Done merging messages and categories')
+
+    return df
 
 
 def clean_data(df):
-    pass
+    """Clean the input dataframe by splitting the categories into separate columns and removing duplicates from the df
+
+    :param df:
+    :return: cleaned df
+    """
+
+    # Split out the list of categories into their own columns
+    logger.info('Splitting categories on delimiter ";" to their own columns')
+    category_split = df['categories'].str.split(';', expand=True)
+    # Get a list of columns and set the column names on the category_split
+    logger.debug('Setting split category column names')
+    category_columns = category_split.iloc[0].apply(lambda x: x.split('-')[0]).tolist()
+    category_split.columns = category_columns
+    logger.info(f'Found {len(category_columns)} columns: {", ".join(category_columns)}')
+    # Update the category values to 0 or 1 by stripping the first line
+    logger.info('Cleaning the category values to be 0 or 1')
+    category_split = category_split.applymap(lambda x: x.split('-')[1])
+
+    # Drop the original categories column from the df
+    logger.debug('dropping the old category column')
+    df = df.drop(columns='categories')
+
+    # Concat the expanded categories back to the df
+    logger.debug('Adding the split categories to df')
+    df = pd.concat([df, category_split], axis=1)
+
+    # Dropping duplicated message ids. Assuming the last record found is the latest record and is correct.
+    logger.info(f'Dropping duplicate message ids, found {df.duplicated(subset="id").sum()} duplicated records...')
+    df = df.drop_duplicates(subset="id", keep='last')
+
+    return df
 
 
 def save_data(df, database_filename):
-    pass
+    """Stores the input df to a SQLite DB in a table called messages
+
+    :param df: dataframe to be stored to database
+    :param database_filename: Filepath where db should be stored.
+    """
+
+    # Assuming database_filename is correct and includes .db
+    engine = create_engine(f'sqlite:///{database_filename}')
+    logger.debug('Writing table messages')
+    df.to_sql('messages', engine, index=False)
 
 
 @click.command()
@@ -28,19 +103,17 @@ def main(messages_filepath, categories_filepath, database_filename):
     Example command:
     python process_data.py disaster_messages.csv disaster_categories.csv DisasterResponse.db
     """
-    print(messages_filepath, categories_filepath, database_filename)
 
-    print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
-          .format(messages_filepath, categories_filepath))
+    logger.info(f'Loading data; MESSAGES: {messages_filepath}, CATEGORIES: {categories_filepath}')
     df = load_data(messages_filepath, categories_filepath)
 
-    print('Cleaning data...')
+    logger.info('Cleaning data...')
     df = clean_data(df)
 
-    print('Saving data...\n    DATABASE: {}'.format(database_filepath))
+    logger.info(f'Saving data to DATABASE: {database_filename}')
     save_data(df, database_filename)
 
-    print('Cleaned data saved to database!')
+    logger.info('Cleaned data saved to database!')
 
 if __name__ == '__main__':
     main()
