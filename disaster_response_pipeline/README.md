@@ -9,12 +9,12 @@ TODO: Add a description on how to run
 
 <details><summary>Project components - check list</summary>
 
-- [ ] (1) ETL Pipeline; in a Python script, process_data.py, write a data cleaning pipeline that:
+- [x] (1) ETL Pipeline; in a Python script, process_data.py, write a data cleaning pipeline that:
 
-  - [ ] Loads the messages and categories datasets
-  - [ ] Merges the two datasets
-  - [ ] Cleans the data
-  - [ ] Stores it in a SQLite database
+  - [x] Loads the messages and categories datasets
+  - [x] Merges the two datasets
+  - [x] Cleans the data
+  - [x] Stores it in a SQLite database
 
 - [ ] (2) ML Pipeline; in a Python script, train_classifier.py, write a machine learning pipeline that:
   - [ ] Loads data from the SQLite database
