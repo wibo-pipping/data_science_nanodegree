@@ -59,7 +59,7 @@ def clean_data(df):
     logger.info(f'Found {len(category_columns)} columns: {", ".join(category_columns)}')
     # Update the category values to 0 or 1 by stripping the first line
     logger.info('Cleaning the category values to be 0 or 1')
-    category_split = category_split.applymap(lambda x: x.split('-')[1])
+    category_split = category_split.applymap(lambda x: int(x.split('-')[1]))
 
     # Drop the original categories column from the df
     logger.debug('dropping the old category column')
@@ -72,6 +72,13 @@ def clean_data(df):
     # Dropping duplicated message ids. Assuming the last record found is the latest record and is correct.
     logger.info(f'Dropping duplicate message ids, found {df.duplicated(subset="id").sum()} duplicated records...')
     df = df.drop_duplicates(subset="id", keep='last')
+
+    logger.info(f'Dropping split categories that have values that are not equal to 1 or 0')
+    # Create filter view on valid rows to include, use axis=1 to get 1 boolean value per row
+    in_bounds_filter = ((df[category_columns] >= 0) & (df[category_columns] <= 1)).all(axis=1)
+    logger.info(f'Keeping {in_bounds_filter.sum()} rows with inbound values,'
+                f'dropping {in_bounds_filter.size-in_bounds_filter.sum()} incorrect rows')
+    df = df.loc[in_bounds_filter,:]
 
     return df
 
@@ -86,7 +93,7 @@ def save_data(df, database_filename):
     # Assuming database_filename is correct and includes .db
     engine = create_engine(f'sqlite:///{database_filename}')
     logger.debug('Writing table messages')
-    df.to_sql('messages', engine, index=False)
+    df.to_sql('messages', engine, index=False, if_exists='replace')
 
 
 @click.command()
