@@ -6,6 +6,18 @@ TODO: Write short summary on the pipeline
 ## How to run
 TODO: Add a description on how to run 
 
+## Pipeline decisions
+### ETL:
+<b>Duplicates</b>   
+During the data cleaning duplicated messages ids were found, deduplication keeps the last row encountered
+based on the order in the input file. In absence of a timestamp, this was done on the assumption
+that the last row of data in the file was added at a later time.
+
+<b>Incorrect classification labels:</b>  
+In the categories input file there were outcome variables with the value of 2 for the `related` category.
+As this is boolean type field, the decision was made to drop all rows with values outside 1 or 0. An alternative
+to this could have been to set all values higher than 1 to 1.
+
 
 <details><summary>Project components - check list</summary>
 

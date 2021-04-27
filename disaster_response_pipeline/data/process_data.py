@@ -69,12 +69,15 @@ def clean_data(df):
     logger.debug('Adding the split categories to df')
     df = pd.concat([df, category_split], axis=1)
 
+    # Drop
+
     # Dropping duplicated message ids. Assuming the last record found is the latest record and is correct.
     logger.info(f'Dropping duplicate message ids, found {df.duplicated(subset="id").sum()} duplicated records...')
     df = df.drop_duplicates(subset="id", keep='last')
 
     logger.info(f'Dropping split categories that have values that are not equal to 1 or 0')
-    # Create filter view on valid rows to include, use axis=1 to get 1 boolean value per row
+    # Create filter view on valid rows to include, assuming values >1 indicate values that are duplicated
+    # use axis=1 to get 1 boolean value per row
     in_bounds_filter = ((df[category_columns] >= 0) & (df[category_columns] <= 1)).all(axis=1)
     logger.info(f'Keeping {in_bounds_filter.sum()} rows with inbound values,'
                 f'dropping {in_bounds_filter.size-in_bounds_filter.sum()} incorrect rows')
