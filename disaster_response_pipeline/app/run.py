@@ -1,6 +1,7 @@
 import json
 import plotly
 import pandas as pd
+import logging
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -8,11 +9,22 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+import joblib
 from sqlalchemy import create_engine
 
-app = Flask(__name__)
+# Create logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
+# Create streamhandler
+ch = logging.StreamHandler()
+# Set logging format and add to handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+# add handler to logger
+logger.addHandler(ch)
+
+app = Flask(__name__)
 
 def tokenize(text):
     tokens = word_tokenize(text)
@@ -27,11 +39,14 @@ def tokenize(text):
 
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+logger.info('Creating SQLite engine')
+engine = create_engine('sqlite:///../data/clean_messages.db')
+logger.info('Reading in messages')
+df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+logger.info('Unpickling the message classification model')
+model = joblib.load("../models/message_model.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -83,6 +98,9 @@ def go():
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
+
+    logger.warning(f'Classification_labels: {classification_labels}')
+    logger.warning(f'classification_results: {classification_results}')
 
     # This will render the go.html Please see that file.
     return render_template(
