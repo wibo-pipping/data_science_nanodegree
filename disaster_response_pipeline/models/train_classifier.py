@@ -113,17 +113,77 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    """Take the test set and predict the expected labels using the model. Prints the test score to screen.
 
+    :param model: Trained estimator model to use for prediction
+    :param X_test: Test set data to predict labels on
+    :param Y_test: Test set labels
+    :param category_names: List of names to print next to the labels
+    :return: None
+    """
+    predicted_y = model.predict(X_test)
+
+    # Max Category Length --> for printing purposes.
+    cat_spacing = len(max(category_names, key=len))
+
+    for i, category in enumerate(category_names):
+        # Select y_true and y_pred
+        y_true = Y_test.iloc[:, i].tolist()
+        y_pred = predicted_y[:,i]
+
+        # Get the classfication report as a dict, using only the macro avg as to ensure penalisation of class imbalance
+        # is taken into account
+        classification_dict = (classification_report(y_true=y_true, y_pred=y_pred,output_dict=True))['macro avg']
+
+        # Get accuracy, precision and recall, multiple by 100 to report percentages
+        acc = classification_dict['f1-score']*100
+        prc = classification_dict['precision']*100
+        rcl = classification_dict['recall']*100
+
+        report_string = f'Category: {category:>{cat_spacing}}\t' \
+                        f'Accuracy: {acc:.2f}%\tPrecision: {prc:.2f}%\tRecall: {rcl:.2f}%'
+        # Print instead of logging to get clean lines without timestamps etc.
+        print(report_string)
+
+
+def search_grid(model, X_train, Y_train):
+    """Optimize the classifier in the model object and return the best set of parameters found in the GridSearch
+
+    :param model: Pipeline object with the classifier
+    :param X_train: Training data set
+    :param Y_train: Outcome labels for training data set
+    :return: Model tuned for the best parameters
+    """
+    param_grid = {
+        'clf__estimator__n_estimators': [200, 600],
+        'clf__estimator__min_samples_split': [5, 10],
+        'clf__estimator__max_depth': [100]
+    }
+    logger.info(f'Optimizing model with following param grid: {param_grid}')
+
+    search = GridSearchCV(model, param_grid=param_grid, cv=3, n_jobs=-1, scoring='accuracy', verbose=8)
+    search.fit(X_train, Y_train)
+
+    logger.info(f'Best accuracy score: {search.best_score_}')
+    logger.info(f'Best performing set of parameters: {search.best_params_}')
+
+    return search.best_estimator_
 
 def save_model(model, model_filepath):
-    pass
+    """Take in the model and store as a .pickle file
+
+    :param model: Model to save to pickle file
+    :param model_filepath: filepath where to store the pickle
+    """
+    with open(model_filepath,'wb') as f:
+        pickle.dump(model, f)
 
 
 @click.command()
 @click.argument('database_filepath', type=click.Path(exists=True))
 @click.argument('model_filepath', type=click.Path())
-def main(database_filepath, model_filepath):
+@click.option('--p/--np', default = False)
+def main(database_filepath, model_filepath, p):
     """
     Please provide the filepath of the disaster messages database as the first argument and
     the filepath of the pickle file to save the model to as the second argument.
