@@ -18,7 +18,47 @@ In the categories input file there were outcome variables with the value of 2 fo
 As this is boolean type field, the decision was made to drop all rows with values outside 1 or 0. An alternative
 to this could have been to set all values higher than 1 to 1.
 
+### ML Pipeline
+<b>Randomized Search</b>  
+A randomized search with cross-validation was done to narrow down the possible ranges of params for the estimator to use in
+GridSearch optimasation. The `RandomForestClassifier` was used as the estimator, with the following
+parameter ranges to search:
 
+| Parameter | Value Range |
+|-----|-----|
+| n_estimators | 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000 |
+| max_features | auto, sqrt |
+| max_depth | 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, None |
+| min_samples_split | 2, 5, 10 |
+| min_samples_leaf | 1, 2, 4 |
+| bootstrap | True, False |
+
+Using the sklearn [RandomizedSearchCV](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.RandomizedSearchCV.html)
+with a five fold cross validation produced the following parameters with results where obtained:
+
+|   rank_test_score | mean_test_score | std_test_score |   n_estimators |   min_samples_split |   min_samples_leaf | max_features   |   max_depth | bootstrap   |
+|------------------:|----------------:|---------------:|---------------:|--------------------:|-------------------:|:---------------|------------:|:------------|
+|                 1 |          0.2294 |       0.00702  |           1200 |                  10 |                  1 | auto           |         110 | False       |
+|                 2 |          0.2058 |       0.00633  |            200 |                   5 |                  2 | sqrt           |         110 | True        |
+|                 3 |          0.1923 |       0.00640  |           1000 |                   5 |                  4 | auto           |         100 | False       |
+|                 4 |          0.1922 |       0.00582  |           1800 |                  10 |                  4 | sqrt           |         100 | False       |
+|                 5 |          0.1915 |       0.00806  |            200 |                   2 |                  1 | auto           |          20 | False       |
+|                 6 |          0.1902 |       0.00781  |           2000 |                  10 |                  2 | sqrt           |          20 | False       |
+|                 7 |          0.1899 |       0.00767  |            200 |                   2 |                  1 | sqrt           |          30 | False       |
+|                 8 |          0.1897 |       0.00685  |            400 |                   2 |                  4 | auto           |          70 | False       |
+|                 9 |          0.1874 |       0.00782  |            600 |                   2 |                  4 | auto           |          40 | False       |
+|                10 |          0.1863 |       0.00739  |           2000 |                  10 |                  4 | auto           |          50 | True        |
+
+To reduce the run time of the actual model training the input for the `GridSearchCV` will be limited to the following:
+```python
+param_grid = {
+  'n_estimators': [200, 600, 1200],
+  'min_samples_split': [5, 10],
+  'max_depth': [100, 110]
+}
+```
+
+## Miscellaneous & Notes
 <details><summary>Project components - check list</summary>
 
 - [x] (1) ETL Pipeline; in a Python script, process_data.py, write a data cleaning pipeline that:
@@ -29,8 +69,8 @@ to this could have been to set all values higher than 1 to 1.
   - [x] Stores it in a SQLite database
 
 - [ ] (2) ML Pipeline; in a Python script, train_classifier.py, write a machine learning pipeline that:
-  - [ ] Loads data from the SQLite database
-  - [ ] Splits the dataset into training and test sets
+  - [x] Loads data from the SQLite database
+  - [x] Splits the dataset into training and test sets
   - [ ] Builds a text processing and machine learning pipeline
   - [ ] Trains and tunes a model using GridSearchCV
   - [ ] Outputs results on the test set
