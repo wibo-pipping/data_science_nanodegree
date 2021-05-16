@@ -68,12 +68,12 @@ param_grid = {
   - [x] Cleans the data
   - [x] Stores it in a SQLite database
 
-- [ ] (2) ML Pipeline; in a Python script, train_classifier.py, write a machine learning pipeline that:
+- [x] (2) ML Pipeline; in a Python script, train_classifier.py, write a machine learning pipeline that:
   - [x] Loads data from the SQLite database
   - [x] Splits the dataset into training and test sets
   - [x] Builds a text processing and machine learning pipeline
   - [x] Trains and tunes a model using GridSearchCV
-  - [ ] Outputs results on the test set
+  - [x] Outputs results on the test set
   - [x] Exports the final model as a pickle file
     
 - [ ] (3) Flask Web App; we are providing much of the flask web app for you, but feel free to add extra features depending on your knowledge of flask, html, css and javascript. For this part, you'll need to:
