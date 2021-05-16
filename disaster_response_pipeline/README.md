@@ -52,9 +52,9 @@ with a five fold cross validation produced the following parameters with results
 To reduce the run time of the actual model training the input for the `GridSearchCV` will be limited to the following:
 ```python
 param_grid = {
-  'n_estimators': [200, 600, 1200],
+  'n_estimators': [200, 600],
   'min_samples_split': [5, 10],
-  'max_depth': [100, 110]
+  'max_depth': [100]
 }
 ```
 
@@ -71,10 +71,10 @@ param_grid = {
 - [ ] (2) ML Pipeline; in a Python script, train_classifier.py, write a machine learning pipeline that:
   - [x] Loads data from the SQLite database
   - [x] Splits the dataset into training and test sets
-  - [ ] Builds a text processing and machine learning pipeline
-  - [ ] Trains and tunes a model using GridSearchCV
+  - [x] Builds a text processing and machine learning pipeline
+  - [x] Trains and tunes a model using GridSearchCV
   - [ ] Outputs results on the test set
-  - [ ] Exports the final model as a pickle file
+  - [x] Exports the final model as a pickle file
     
 - [ ] (3) Flask Web App; we are providing much of the flask web app for you, but feel free to add extra features depending on your knowledge of flask, html, css and javascript. For this part, you'll need to:
   - [ ] Modify file paths for database and model as needed

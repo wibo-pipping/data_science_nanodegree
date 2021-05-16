@@ -140,8 +140,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
         prc = classification_dict['precision']*100
         rcl = classification_dict['recall']*100
 
-        report_string = f'Category: {category:>{cat_spacing}}\t' \
-                        f'Accuracy: {acc:.2f}%\tPrecision: {prc:.2f}%\tRecall: {rcl:.2f}%'
+        report_string = f'{category:>{cat_spacing}}\tAccuracy: {acc:.2f}%\tPrecision: {prc:.2f}%\tRecall: {rcl:.2f}%'
         # Print instead of logging to get clean lines without timestamps etc.
         print(report_string)
 
