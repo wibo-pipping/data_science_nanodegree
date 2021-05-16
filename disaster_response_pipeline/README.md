@@ -58,7 +58,7 @@ param_grid = {
 }
 ```
 
-<b>Classification report</b>
+<b>Classification report</b>  
 In the classification report the `macro avg` is used to print on screen. This decision was made after looking at possible
 imbalance between the labels. It turned out 76% of the data set was labelled `related` and there are no records found for
 `child_alone`. 
