@@ -181,7 +181,6 @@ def save_model(model, model_filepath):
 @click.command()
 @click.argument('database_filepath', type=click.Path(exists=True))
 @click.argument('model_filepath', type=click.Path())
-@click.option('--p/--np', default = False)
 def main(database_filepath, model_filepath, p):
     """
     Please provide the filepath of the disaster messages database as the first argument and
@@ -196,26 +195,19 @@ def main(database_filepath, model_filepath, p):
     X, Y, category_names = load_data(database_filepath)
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
 
-    if p:
+    logger.info('Building model...')
+    model = build_model()
 
-        logger.info('Building model...')
-        model = build_model()
-
-        logger.info('Searching through param grid and selecting best performing model')
-        model = search_grid(model, X_train, Y_train)
-    else:
-        logger.info('Reading pickle file')
-        with open(model_filepath, 'rb') as f:
-            model = pickle.load(f)
+    logger.info('Searching through param grid and selecting best performing model')
+    model = search_grid(model, X_train, Y_train)
 
     logger.info('Evaluating model...')
     evaluate_model(model, X_test, Y_test, category_names)
 
-    if p:
-        logger.info('Saving model...\n    MODEL: {}'.format(model_filepath))
-        save_model(model, model_filepath)
+    logger.info('Saving model...\n    MODEL: {}'.format(model_filepath))
+    save_model(model, model_filepath)
 
-        logger.info('Trained model saved!')
+    logger.info('Trained model saved!')
 
 
 if __name__ == '__main__':
