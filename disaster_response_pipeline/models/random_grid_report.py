@@ -3,6 +3,7 @@ import pickle
 import pandas as pd
 import logging
 
+# Need to import the tokenize function to read the pickle file
 from train_classifier import tokenize
 
 # Create logger

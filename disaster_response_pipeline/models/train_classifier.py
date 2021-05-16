@@ -5,13 +5,16 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 from sklearn.model_selection import train_test_split
+import sklearn
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
 
+from sklearn.model_selection import GridSearchCV
+
+import pickle
 
 import re
 import nltk
@@ -31,6 +34,9 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 # add handler to logger
 logger.addHandler(ch)
+
+
+URL_REGEX = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 
 def load_data(database_filepath):
@@ -60,11 +66,50 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
-    pass
+    """Input a string of text to be normalised, lemmatized and tokenized.
+
+    :param text: string of text
+    :return: list of cleaned and lemmatized word tokens
+    """
+    # get list of all urls using regex
+    detected_urls = re.findall(URL_REGEX, text)
+
+    # replace each url in text string with placeholder
+    for url in detected_urls:
+        text = text.replace(url, 'urlplaceholder')
+
+    # normalize the text
+    normalized_text = re.sub(r'[^a-z0-9]', " ", text).lower()
+
+    # tokenize text
+    tokens = word_tokenize(normalized_text)
+
+    # initiate lemmatizer
+    lemmatizer = WordNetLemmatizer()
+
+    # iterate through each token
+    clean_tokens = []
+    for tok in tokens:
+        # lemmatize and remove leading/trailing white space
+        clean_tok = lemmatizer.lemmatize(tok).strip()
+        clean_tokens.append(clean_tok)
+
+    return clean_tokens
 
 
 def build_model():
-    pass
+    """Define the pipeline to vectorize, transform and classify the data.
+
+    :return: pipeline
+    """
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ]
+    )
+
+    return pipeline
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -92,19 +137,27 @@ def main(database_filepath, model_filepath):
     X, Y, category_names = load_data(database_filepath)
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
 
-    logger.info('Building model...')
-    model = build_model()
+    if p:
 
-    logger.info('Training model...')
-    model.fit(X_train, Y_train)
+        logger.info('Building model...')
+        model = build_model()
+
+        logger.info('Searching through param grid and selecting best performing model')
+        model = search_grid(model, X_train, Y_train)
+    else:
+        logger.info('Reading pickle file')
+        with open(model_filepath, 'rb') as f:
+            model = pickle.load(f)
 
     logger.info('Evaluating model...')
     evaluate_model(model, X_test, Y_test, category_names)
 
-    logger.info('Saving model...\n    MODEL: {}'.format(model_filepath))
-    save_model(model, model_filepath)
+    if p:
+        logger.info('Saving model...\n    MODEL: {}'.format(model_filepath))
+        save_model(model, model_filepath)
 
-    logger.info('Trained model saved!')
+        logger.info('Trained model saved!')
+
 
 if __name__ == '__main__':
     main()
