@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Pie
 import joblib
 from sqlalchemy import create_engine
 
@@ -47,6 +47,85 @@ df = pd.read_sql_table('messages', engine)
 # load model
 logger.info('Unpickling the message classification model')
 model = joblib.load("../models/message_model.pkl")
+
+def generate_bar_graph(x, y, title, orientation='v', label_tickangle=0):
+    """Input the x and y with a x axis label and returns a Plotly graph dict for a Bar chart with counts
+
+    :param x: List of genres to plot
+    :param y: Counts of the genres
+    :param title: X axis label to display. Is used in the graph title as well
+    :param orientation: 'v' or 'h' for a vertical or horizontal plot
+    :return: Plotly graph dict object
+    """
+
+    # To properly set the xaxis in yaxis in orientation switches, use the base
+    category_axis = {'title': title, 'tickangle': label_tickangle}
+    count_axis = {'title': 'Count'}
+
+    # Handle orientation switches
+    if orientation == 'v':
+        x_values = x
+        y_values = y
+        xaxis = category_axis
+        yaxis = count_axis
+    else: # Flip the x and y
+        x_values = y
+        y_values = x
+        xaxis = count_axis
+        yaxis = category_axis
+
+
+    layout = {
+        'title': f'Distribution of Message {title}',
+        'xaxis':xaxis,
+        'yaxis':yaxis
+    }
+
+    graph = {
+        'data': [
+            Bar(x=x_values,
+                y=y_values,
+                orientation=orientation
+            )
+        ],
+        'layout':layout
+    }
+
+    return graph
+
+
+def generate_pie_chart(labels, values):
+    """Generate the Pie chart graph object
+
+    :param labels: labels to use in Pie chart
+    :param values: Values to use in Pie chart
+    :return: Plotly graph object for Pie chart
+    """
+    graph = {
+        'data': [
+            Pie(labels=labels,
+                values=values
+                )
+        ],
+        'layout': {
+            'title': f'No, One or Multi label messegas'
+        }
+    }
+
+    return graph
+
+def get_label_class(input):
+    """Input an integer and returns the label class, 'No label', 'One label' or 'Multi label'
+
+    :param input: Integer
+    :return: Label class as a string
+    """
+    if input == 0:
+        return 'No label'
+    elif input == 1:
+        return 'One label'
+    else:
+        return 'Multi label'
 
 
 # index webpage displays cool visuals and receives user input text for model
