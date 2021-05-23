@@ -9,6 +9,9 @@ The pipeline contains three separate steps that need to be run in order.
 2. `python models/train_classifier.py <database_file_step_1> models/message_model.pkl`
 3. 
 
+### Setting up the environment 
+The pipeline requires a python version >3.6. The required python packages can be installed with `pip install -r requirements.txt`
+
 ### Step 1. Preparing the data
 The data preprocessing is available in the `data` folder. It takes in messages, cleans the data and prepares it for
 the machine learning pipeline. The output will be stored as a SQLite database.
