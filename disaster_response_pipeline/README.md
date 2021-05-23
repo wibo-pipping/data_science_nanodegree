@@ -82,9 +82,9 @@ imbalance between the labels. It turned out 76% of the data set was labelled `re
   - [x] Outputs results on the test set
   - [x] Exports the final model as a pickle file
     
-- [ ] (3) Flask Web App; we are providing much of the flask web app for you, but feel free to add extra features depending on your knowledge of flask, html, css and javascript. For this part, you'll need to:
-  - [ ] Modify file paths for database and model as needed
-  - [ ] Add data visualizations using Plotly in the web app. One example is provided for you
+- [x] (3) Flask Web App; we are providing much of the flask web app for you, but feel free to add extra features depending on your knowledge of flask, html, css and javascript. For this part, you'll need to:
+  - [x] Modify file paths for database and model as needed
+  - [x] Add data visualizations using Plotly in the web app. One example is provided for you
 </details>
 
 
