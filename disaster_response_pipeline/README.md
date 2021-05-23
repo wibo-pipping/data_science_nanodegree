@@ -4,7 +4,26 @@
 TODO: Write short summary on the pipeline
 
 ## How to run
-TODO: Add a description on how to run 
+The pipeline contains three separate steps that need to be run in order
+### Step 1. Preparing the data
+The data preprocessing is available in the `data` folder. It takes in messages, cleans the data and prepares it for
+the machine learning pipeline. The output will be stored as a SQLite database.
+
+Required files:
+- File with raw messages; This is a file with the training messages including the genre, new, direct or social 
+- File with message categories; This is a file with the 36 category labels.
+
+To run, from the project folder run:  
+`python data/process_data.py <message_filepath> <category_filepath> <output_for_database_file>`
+
+For more info run:  
+`python data/process_data.py --help`
+
+### Step 2. Training the classifier
+
+
+### Step 3. Firing up the webapp
+
 
 ## Pipeline decisions
 ### ETL:
