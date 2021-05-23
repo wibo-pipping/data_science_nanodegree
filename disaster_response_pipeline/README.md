@@ -5,9 +5,9 @@ TODO: Write short summary on the pipeline
 
 ## How to run
 The pipeline contains three separate steps that need to be run in order.
-1. `python data/process_data.py <message_filepath> <category_filepath> <output_for_database_file>`
-2. `python models/train_classifier.py <database_file_step_1> models/message_model.pkl`
-3. 
+1. `python data/process_data.py data/disaster_message.csv data/disaster_categories.csv data/clean_messages.db`
+2. `python models/train_classifier.py data/clean_messages.db models/message_model.pkl`
+3. `python app/run.py`
 
 ### Setting up the environment 
 The pipeline requires a python version >3.6. The required python packages can be installed with `pip install -r requirements.txt`
@@ -23,6 +23,9 @@ Required files:
 To run, from the project folder run:  
 `python data/process_data.py <message_filepath> <category_filepath> <output_for_database_file>`
 
+It is suggested to use the `data/clean_messages.db` as output_for_data_base_file, this is the expected location in for
+the file in step 3.
+
 For more info run:  
 `python data/process_data.py --help`
 
@@ -33,7 +36,11 @@ Training the model estimator. This requires the database file from step 1. To ru
 <sub>The pickle file is expected to be in `models/message_model.pkl` for step 3.</sub>
 
 ### Step 3. Firing up the webapp
+In order for the webapplication to work correctly it needs the both the SQLite database file from step 1 and
+the pickled model from step 2. Starting the webapp can be done with:  
+`python app/run.py`
 
+When the app is running go to: `localhost:3001` to find the dashboard and the message input field. 
 
 ## Pipeline decisions
 ### ETL:
