@@ -40,13 +40,13 @@ def tokenize(text):
 
 # load data
 logger.info('Creating SQLite engine')
-engine = create_engine('sqlite:///../data/clean_messages.db')
+engine = create_engine('sqlite:///data/clean_messages.db')
 logger.info('Reading in messages')
 df = pd.read_sql_table('messages', engine)
 
 # load model
 logger.info('Unpickling the message classification model')
-model = joblib.load("../models/message_model.pkl")
+model = joblib.load("models/message_model.pkl")
 
 def generate_bar_graph(x, y, title, orientation='v', label_tickangle=0):
     """Input the x and y with a x axis label and returns a Plotly graph dict for a Bar chart with counts
@@ -169,9 +169,6 @@ def go():
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
-
-    logger.warning(f'Classification_labels: {classification_labels}')
-    logger.warning(f'classification_results: {classification_results}')
 
     # This will render the go.html Please see that file.
     return render_template(
