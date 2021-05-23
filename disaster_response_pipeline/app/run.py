@@ -133,31 +133,23 @@ def get_label_class(input):
 @app.route('/index')
 def index():
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
 
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
+    # Add count per label value
+    label_subset = df.iloc[:, 4:]
+    label_counts = label_subset.sum().sort_values()
+    label_names = list(label_counts.index.str.replace('_',' '))
 
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
+    # Check no labels, 1 label or multi label by summing over rows, getting the labels and counting occurances:
+    multi_label_values = label_subset.sum(axis=1).apply(get_label_class).value_counts()
+    multi_label_labels = list(multi_label_values.index)
+
+    # create visuals
+    graphs = [
+        generate_bar_graph(genre_names, genre_counts, "Genre"),
+        generate_pie_chart(multi_label_labels, multi_label_values),
+        generate_bar_graph(label_names, label_counts,"Labels", label_tickangle=-45),
     ]
 
     # encode plotly graphs in JSON
