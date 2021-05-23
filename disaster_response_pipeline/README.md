@@ -1,9 +1,28 @@
 # Disaster Reponse Pipeline
 
 ## Summary
-TODO: Write short summary on the pipeline
+In the modern day of social media there is a lot of communication going on during and right after disasters strike.
+This information stream comes mostly from people in need in the affected areas and are a rich source of information for rescue workers.
+Unfortunately the volume of these messages is high, at the same time the rescue worker doesn't have time to spare.
 
-## How to run
+It would be of great help to the rescue party if they would get a filtered list of messages that are important to them.
+This is where this pipeline can help. In this pipeline the raw messages are taken as input for a multi label classification model
+to allow workers to filter incoming messages effectively, reduce the amount of time spent scanning through communication and
+increase the time they can spend to rescue victims.
+
+The pipeline takes in a set of prelabeled messages, trains a classification model and exposes the result in a easy to use
+web application. The webapplication provides some basic statistics and doubles as an interface to input message and get
+a classification result.
+
+
+The web application home page looks like this:
+![Homepage](assets/main_screen.png)
+
+On the homepage a new message can be entered and the message with receive 1 or more labels out of 36 possible values. 
+Getting labels for a new message:
+![labelled message](assets/message_classified.png)
+
+## How to run the pipeline
 The pipeline contains three separate steps that need to be run in order.
 1. `python data/process_data.py data/disaster_message.csv data/disaster_categories.csv data/clean_messages.db`
 2. `python models/train_classifier.py data/clean_messages.db models/message_model.pkl`
