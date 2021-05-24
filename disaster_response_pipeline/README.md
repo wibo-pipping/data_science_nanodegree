@@ -24,7 +24,7 @@ Getting labels for a new message:
 
 ## How to run the pipeline
 The pipeline contains three separate steps that need to be run in order.
-1. `python data/process_data.py data/disaster_message.csv data/disaster_categories.csv data/clean_messages.db`
+1. `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/clean_messages.db`
 2. `python models/train_classifier.py data/clean_messages.db models/message_model.pkl`
 3. `python app/run.py`
 
